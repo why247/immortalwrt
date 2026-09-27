@@ -11,9 +11,11 @@ grep -qF 'src-git nikki' feeds.conf.default || \
 git clone --depth=1 https://github.com/ophub/luci-app-amlogic package/luci-app-amlogic || true
 
 # HomeProxy：使用 VIKINGYFY/packages 的源码（覆盖 feeds 自带版本）
-rm -rf /tmp/viking-packages package/luci-app-homeproxy
+# homeproxy 要求 sing-box>=1.14.0，软件源自带的太旧，所以 sing-box 也一起换成 VIKINGYFY 的版本
+rm -rf /tmp/viking-packages package/luci-app-homeproxy package/sing-box
 git clone --depth=1 https://github.com/VIKINGYFY/packages /tmp/viking-packages
 cp -r /tmp/viking-packages/luci-app-homeproxy package/luci-app-homeproxy
+cp -r /tmp/viking-packages/sing-box package/sing-box
 rm -rf /tmp/viking-packages
 
 # 安装 feeds
