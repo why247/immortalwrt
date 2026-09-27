@@ -1,0 +1,32 @@
+config interface 'loopback'
+	option device 'lo'
+	option proto 'static'
+	option ipaddr '127.0.0.1'
+	option netmask '255.0.0.0'
+
+config globals 'globals'
+	option packet_steering '1'
+	option steering_flows '256'
+
+config device
+	option name 'eth0'
+	option mtu '1500'
+
+config interface 'lan'
+	option device 'eth0'
+	option proto 'static'
+	option ipaddr '192.168.1.1'
+	option netmask '255.255.255.0'
+
+# 主路由拨号：请在 LuCI（网络 → 接口 → WAN → 编辑）里填写宽带账号和密码
+config interface 'wan'
+	option device 'eth0'
+	option proto 'pppoe'
+	option username ''
+	option password ''
+
+config interface 'wan6'
+	option device '@wan'
+	option proto 'dhcpv6'
+	option reqaddress 'try'
+	option reqprefix 'auto'
