@@ -1,0 +1,11 @@
+#!/bin/sh
+# Set Bootstrap as the default LuCI theme on first boot.
+uci -q set luci.main.mediaurlbase='/luci-static/bootstrap'
+uci -q commit luci
+# LAN IP: 192.168.1.99 (avoid conflict with optical modem at 192.168.1.1)
+uci -q set network.lan.ipaddr='192.168.1.99'
+uci -q commit network
+# Ensure BBR sysctl settings are applied (in case sysctl.conf wasn't picked up)
+sysctl -w net.ipv4.tcp_congestion_control=bbr 2>/dev/null
+sysctl -w net.core.default_qdisc=fq 2>/dev/null
+exit 0
