@@ -44,6 +44,9 @@ fi
 # --- 5. GRO / 校验和 offload 保持开启 (QUIC 收包依赖) ---
 if command -v ethtool >/dev/null 2>&1; then
     ethtool -K eth0 gro on rx on tx on 2>/dev/null
+    # 高爆发：中断合并，减少高吞吐时的中断开销
+    # rx-usecs 100 = 100微秒内合并中断，tx-frames 32 = 32帧合并一次
+    ethtool -C eth0 rx-usecs 100 tx-usecs 100 rx-frames 32 tx-frames 32 2>/dev/null
 fi
 
 # --- 6. 系统日志走内存, 不写 eMMC (eMMC 随机写差, 延长寿命) ---
