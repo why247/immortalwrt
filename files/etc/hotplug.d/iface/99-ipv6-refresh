@@ -1,0 +1,11 @@
+#!/bin/sh
+# /etc/hotplug.d/iface/99-ipv6-refresh
+# PPPoE 重拨后 IPv6 前缀可能变化，记录日志便于排查
+# 如 IPv6 不通，手动跑: /etc/init.d/network restart
+
+[ "$ACTION" = "ifup" ] || exit 0
+[ "$INTERFACE" = "wan" ] || exit 0
+
+logger -t ipv6-refresh "WAN up, current IPv6: $(ip -6 addr show pppoe-wan 2>/dev/null | grep 'inet6.*global' | awk '{print $2}')"
+
+exit 0
