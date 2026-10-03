@@ -77,7 +77,7 @@
  	if [ "$client_ready" -eq 1 ]; then
  		# DNSMasq rules
  		local dns_port dns_ready=1
-@@ -327,10 +366,10 @@
+@@ -327,12 +366,19 @@
  
  		# QUIC-GO GSO is broken on kernel 6.6 currently
  		uname -r | grep -Eq "^6\.6" && procd_set_param env "QUIC_GO_DISABLE_GSO"="true"
