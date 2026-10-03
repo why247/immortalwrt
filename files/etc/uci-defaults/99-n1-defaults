@@ -2,6 +2,9 @@
 # Set Bootstrap as the default LuCI theme on first boot.
 uci -q set luci.main.mediaurlbase='/luci-static/bootstrap'
 uci -q commit luci
+# Default language to Chinese
+uci -q set luci.main.lang='zh_cn'
+uci -q commit luci
 # Ensure BBR sysctl settings are applied (in case sysctl.conf wasn't picked up)
 sysctl -w net.ipv4.tcp_congestion_control=bbr 2>/dev/null
 sysctl -w net.core.default_qdisc=fq 2>/dev/null
