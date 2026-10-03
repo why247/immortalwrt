@@ -1,0 +1,38 @@
+#!/bin/sh
+# 99-n1-thresh-dtb: 首次启动自动切换到 thresh 版 DTB
+# thresh DTB 启用 snps,force_thresh_dma_mode，解决单臂模式下
+# 交换机流控协商失败导致的单连接测速腰斩问题（测速 128M vs 下载 323M）
+# 只在 thresh 文件存在且当前不是 thresh 时才切换
+
+THRESH_DTB="meson-gxl-s905d-phicomm-n1-thresh.dtb"
+UENV="/boot/uEnv.txt"
+
+# /boot 可能还没挂载，等待一下
+for i in 1 2 3 4 5; do
+    [ -f "$UENV" ] && break
+    sleep 2
+done
+
+[ -f "$UENV" ] || exit 0
+
+# thresh 文件存在吗？
+THRESH_PATH=""
+for d in /boot/dtb/amlogic /dtb/amlogic; do
+    if [ -f "$d/$THRESH_DTB" ]; then
+        THRESH_PATH="$d/$THRESH_DTB"
+        break
+    fi
+done
+[ -n "$THRESH_PATH" ] || exit 0
+
+# 已经是 thresh 了就不动
+grep -q "$THRESH_DTB" "$UENV" && exit 0
+
+# 备份并切换
+cp "$UENV" "$UENV.bak.nothresh" 2>/dev/null
+sed -i "s|meson-gxl-s905d-phicomm-n1\.dtb|$THRESH_DTB|g" "$UENV"
+
+# 记录日志
+logger -t n1-thresh-dtb "Switched to $THRESH_DTB, reboot to take effect"
+
+exit 0
