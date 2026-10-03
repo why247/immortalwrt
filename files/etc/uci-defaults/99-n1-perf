@@ -3,7 +3,7 @@
 # 基于 n1-hy2-optimization-guide.md P1/P2 项
 
 # --- 1. CPU governor -> performance (S905D 突发负载升频延迟, 直接锁最高频) ---
-for gov in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
+for gov in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
     [ -w "$gov" ] && echo performance > "$gov" 2>/dev/null
 done
 
