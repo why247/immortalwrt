@@ -160,6 +160,11 @@
 +
 +/* UDP: LAN clients via TPROXY; router-local traffic is marked here and
 + * picked up by the fwmark policy route (see init.d) into the TPROXY socket. */
++/* DIVERT: fast path for established UDP flows. Matches packets already
++ * bound to the transparent TPROXY socket, skips all bypass rules and the
++ * 12k CIDR lookups. Standard XTLS/mihomo technique. Needs kmod-nft-socket. */
++push(nft, 'chain hp_divert_pre {\n\ttype filter hook prerouting priority mangle - 5; policy accept;\n' +
++	`\tsocket transparent 1 meta mark set ${tproxy_mark} counter accept\n};`);
 +push(nft, nft_chain('hp_tproxy_pre',
 +	'type filter hook prerouting priority mangle', true,
 +	`meta l4proto udp tproxy to :${tproxy_port}`));
