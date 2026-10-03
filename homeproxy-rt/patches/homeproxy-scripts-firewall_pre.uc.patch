@@ -99,7 +99,9 @@
 +}
 +
 +function nft_set(name, type, cidrs) {
-+	let decl = `set ${name} {\n\ttype ${type}\n\tflags interval\n`;
++	let decl = `set ${name} {\n\ttype ${type}\n\tflags interval,auto-merge\n`;
++	/* auto-merge: collapse adjacent CIDRs (e.g. two /24 -> one /23),
++	 * fewer rbtree nodes, faster lookups. Zero risk, pure frontend opt. */
 +	if (length(cidrs))
 +		decl += `\telements = { ${join(', ', cidrs)} }\n`;
 +	decl += '}\n';
