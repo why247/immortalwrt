@@ -15,8 +15,9 @@ config device
 config interface 'lan'
 	option device 'eth0'
 	option proto 'static'
-	option ipaddr '192.168.1.1'
+	option ipaddr '192.168.1.99'
 	option netmask '255.255.255.0'
+	option ip6assign '60'
 
 # 主路由拨号：请在 LuCI（网络 → 接口 → WAN → 编辑）里填写宽带账号和密码
 config interface 'wan'
