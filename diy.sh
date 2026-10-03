@@ -1,8 +1,5 @@
 #!/bin/bash
-
-# 添加 nikki feed（提供 luci-app-nikki）
-grep -qF 'src-git nikki' feeds.conf.default || \
-  echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> feeds.conf.default
+set -e
 
 # 更新 feeds
 ./scripts/feeds update -a
@@ -17,6 +14,16 @@ git clone --depth=1 https://github.com/VIKINGYFY/packages /tmp/viking-packages
 cp -r /tmp/viking-packages/luci-app-homeproxy package/luci-app-homeproxy
 cp -r /tmp/viking-packages/sing-box package/sing-box
 rm -rf /tmp/viking-packages
+
+# HomeProxy 补丁集：redirect/tproxy 改造 + 防火墙去重 + 原子回滚 + cn_ip 免重启
+# 补丁集放在 $GITHUB_WORKSPACE/homeproxy-rt/（随构建包一起上传）
+HP_RT="$GITHUB_WORKSPACE/homeproxy-rt"
+if [ -d "$HP_RT" ]; then
+  echo "Applying HomeProxy patch set from $HP_RT ..."
+  sh "$HP_RT/apply-patches.sh" package/luci-app-homeproxy
+else
+  echo "WARNING: homeproxy-rt patch set not found at $HP_RT, building unpatched HomeProxy" >&2
+fi
 
 # 安装 feeds
 ./scripts/feeds install -a
