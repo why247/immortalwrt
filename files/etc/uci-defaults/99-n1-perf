@@ -1,0 +1,52 @@
+#!/bin/sh
+# N1 (S905D) HY2 性能优化 - 首次开机执行
+# 基于 n1-hy2-optimization-guide.md P1/P2 项
+
+# --- 1. CPU governor -> performance (S905D 突发负载升频延迟, 直接锁最高频) ---
+for gov in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
+    [ -w "$gov" ] && echo performance > "$gov" 2>/dev/null
+done
+
+# --- 2. Threaded NAPI (RPS 生效的前提, 节点存在才开) ---
+if [ -w /sys/class/net/eth0/threaded ]; then
+    echo 1 > /sys/class/net/eth0/threaded 2>/dev/null
+fi
+
+# --- 3. RPS: 按实际 CPU 数生成 mask (N1=4核 -> f) ---
+nproc=$(nproc 2>/dev/null || echo 4)
+# 生成全核 mask: 4核->f, 以此类推
+mask=$(printf '%x' $(( (1 << nproc) - 1 )) )
+for q in /sys/class/net/eth0/queues/rx-*/rps_cpus; do
+    [ -w "$q" ] && echo "$mask" > "$q" 2>/dev/null
+done
+
+# --- 4. Ring Buffer 拉到驱动报告的最大值 (禁止硬编码, 先读 ethtool -g) ---
+if command -v ethtool >/dev/null 2>&1; then
+    # 解析 "RX: 4096" 这类 Pre-set maximums 行
+    max_rx=$(ethtool -g eth0 2>/dev/null | awk '/^RX:/{print $2; exit}')
+    max_tx=$(ethtool -g eth0 2>/dev/null | awk '/^TX:/{print $2; exit}')
+    [ -n "$max_rx" ] && [ -n "$max_tx" ] && \
+        ethtool -G eth0 rx "$max_rx" tx "$max_tx" 2>/dev/null
+fi
+
+# --- 5. GRO / 校验和 offload 保持开启 (QUIC 收包依赖) ---
+if command -v ethtool >/dev/null 2>&1; then
+    ethtool -K eth0 gro on rx on tx on 2>/dev/null
+fi
+
+# --- 6. 系统日志走内存, 不写 eMMC (eMMC 随机写差, 延长寿命) ---
+uci -q set system.@system[0].log_buffer_size='256'
+uci -q set system.@system[0].log_file='/tmp/system.log'
+uci -q commit system
+
+# --- 7. 确认软件流卸载关闭 (会绕过 TPROXY) ---
+uci -q set firewall.@defaults[0].flow_offloading='0'
+uci -q commit firewall
+
+# --- 8. Go 运行时: 只保留 madvdontneed (tachyon 实测其他 Go 调优全是负优化) ---
+if [ -f /etc/init.d/homeproxy ]; then
+    grep -q 'GODEBUG=madvdontneed=1' /etc/init.d/homeproxy || \
+        sed -i '1a export GODEBUG=madvdontneed=1' /etc/init.d/homeproxy
+fi
+
+exit 0
