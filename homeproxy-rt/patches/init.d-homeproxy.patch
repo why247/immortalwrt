@@ -100,6 +100,9 @@
 +		# across respawns. (procd has no native oom_score_adj support)
 +		procd_set_param command /bin/sh -c 'echo -300 > /proc/self/oom_score_adj; exec "$0" "$@"'
 +		procd_append_param command "$PROG" run --config "$RUN_DIR/sing-box-c.json"
++		# N1 has 4 cores to spare, prioritize the proxy. K3 keeps 0 (dual-core
++		# is tight, negative nice could starve ksoftirqd and drop packets).
++		procd_set_param nice -5
 @@ -424,6 +467,7 @@
  	config_load "$CONF"
  	sync_subscription_cron 0 || log "Error: failed to clear the subscription update schedule."
