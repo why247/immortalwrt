@@ -1,6 +1,6 @@
 --- a/root/usr/share/rpcd/ucode/luci.homeproxy
 +++ b/root/usr/share/rpcd/ucode/luci.homeproxy
-@@ -21,13 +21,13 @@
+@@ -21,12 +21,12 @@
  }
  
  const RESOURCES = {
@@ -19,7 +19,7 @@
  	dashboard: {
 --- a/htdocs/luci-static/resources/view/homeproxy/status.js
 +++ b/htdocs/luci-static/resources/view/homeproxy/status.js
-@@ -153,9 +153,9 @@
+@@ -153,8 +153,8 @@
  
  const resources = [
  	{
@@ -32,7 +32,7 @@
  		type: 'geosite_cn',
 --- a/po/zh_Hans/homeproxy.po
 +++ b/po/zh_Hans/homeproxy.po
-@@ -299,9 +299,9 @@
+@@ -299,8 +299,8 @@
  msgstr "国内 DNS 服务器"
  
  #: luci-app-homeproxy/htdocs/luci-static/resources/view/homeproxy/status.js:157
