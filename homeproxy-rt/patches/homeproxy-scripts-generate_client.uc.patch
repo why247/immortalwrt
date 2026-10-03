@@ -186,6 +186,11 @@
 +	}
 +};
 +
++/* DNS performance: larger cache + optimistic stale-while-revalidate.
++ * 1.14 compatible. cache_capacity <1024 is ignored by sing-box. */
++config.dns.cache_capacity = 2048;
++config.dns.optimistic = { enabled: true };
++
 +/* Transparent proxy inbounds: TCP via nftables redirect, UDP via TPROXY.
 + * Mainland IP bypass happens in nftables before traffic reaches these. */
  push(config.inbounds, {
