@@ -1,6 +1,6 @@
 --- a/root/etc/uci-defaults/luci-homeproxy
 +++ b/root/etc/uci-defaults/luci-homeproxy
-@@ -19,6 +19,12 @@
+@@ -19,6 +19,29 @@
  	set firewall.homeproxy_input.position="chain-pre"
  	set firewall.homeproxy_input.chain="input"
  
