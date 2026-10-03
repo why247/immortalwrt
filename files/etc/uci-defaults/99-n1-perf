@@ -20,6 +20,16 @@ for q in /sys/class/net/eth0/queues/rx-*/rps_cpus; do
     [ -w "$q" ] && echo "$mask" > "$q" 2>/dev/null
 done
 
+# --- 3b. 硬 IRQ 绑 CPU1 (dwmac 单队列单 IRQ, RPS 已摊软中断; 按名查找不写死编号) ---
+# 注意: 用 printf 不用 echo (换行会导致 EINVAL)
+for irq in /proc/irq/*/; do
+    name=$(cat "$irq/../"* 2>/dev/null | grep -l 'eth0' 2>/dev/null)
+    [ -n "$name" ] && [ -w "${irq}smp_affinity" ] && printf '2' > "${irq}smp_affinity" 2>/dev/null
+done
+# 更可靠的按名查找:
+eth_irq=$(grep -l 'eth0' /proc/irq/*/actions 2>/dev/null | head -1 | cut -d/ -f4)
+[ -n "$eth_irq" ] && [ -w "/proc/irq/$eth_irq/smp_affinity" ] && printf '2' > "/proc/irq/$eth_irq/smp_affinity" 2>/dev/null
+
 # --- 4. Ring Buffer 拉到驱动报告的最大值 (禁止硬编码, 先读 ethtool -g) ---
 if command -v ethtool >/dev/null 2>&1; then
     # 解析 "RX: 4096" 这类 Pre-set maximums 行
