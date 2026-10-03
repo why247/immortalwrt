@@ -39,11 +39,7 @@ uci -q set system.@system[0].log_buffer_size='256'
 uci -q set system.@system[0].log_file='/tmp/system.log'
 uci -q commit system
 
-# --- 7. 确认软件流卸载关闭 (会绕过 TPROXY) ---
-uci -q set firewall.@defaults[0].flow_offloading='0'
-uci -q commit firewall
-
-# --- 8. Go 运行时: 只保留 madvdontneed (tachyon 实测其他 Go 调优全是负优化) ---
+# --- 7. Go 运行时: 只保留 madvdontneed (tachyon 实测其他 Go 调优全是负优化) ---
 if [ -f /etc/init.d/homeproxy ]; then
     grep -q 'GODEBUG=madvdontneed=1' /etc/init.d/homeproxy || \
         sed -i '1a export GODEBUG=madvdontneed=1' /etc/init.d/homeproxy
