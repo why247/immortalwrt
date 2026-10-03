@@ -60,4 +60,9 @@ if [ -f /etc/init.d/homeproxy ]; then
         sed -i '1a export GODEBUG=madvdontneed=1' /etc/init.d/homeproxy
 fi
 
+# --- 散热：USB 自动休眠 (降温 1-3°C，S905D 80°C 降频红线) ---
+for dev in /sys/bus/usb/devices/*/power/control; do
+    [ -w "$dev" ] && echo auto > "$dev" 2>/dev/null
+done
+
 exit 0
