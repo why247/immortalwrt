@@ -1,9 +1,9 @@
 #!/bin/sh
 # 99-n1-kernel-perf: 首次启动添加内核性能参数到 uEnv.txt
-# isolcpus=3: 隔离 CPU3 给 sing-box (配合 taskset)
+# isolcpus=3: 隔离 CPU3 给 sing-box
 # rcu_nocbs=3: RCU 回调从 CPU3 卸载
 # audit=0: 关闭内核审计，减开销
-# 安全：先备份原文件，参数都是标准内核参数，6.12 支持
+# 注意：flippy 的 uEnv.txt 用 APPEND= 不是 extraargs=
 
 UENV="/boot/uEnv.txt"
 PERF_ARGS="isolcpus=3 rcu_nocbs=3 audit=0"
@@ -22,13 +22,11 @@ grep -q "isolcpus=3" "$UENV" 2>/dev/null && exit 0
 # 备份原文件
 cp "$UENV" "$UENV.bak" 2>/dev/null
 
-# 追加到 extraargs，如果没有 extraargs 就新建一行
-if grep -q "^extraargs=" "$UENV"; then
-    # 追加到现有 extraargs
-    sed -i "s/^extraargs=\(.*\)/extraargs=\1 $PERF_ARGS/" "$UENV"
+# 追加到 APPEND= 行（flippy 格式）
+if grep -q "^APPEND=" "$UENV"; then
+    sed -i "s/^APPEND=\(.*\)/APPEND=\1 $PERF_ARGS/" "$UENV"
 else
-    # 新建 extraargs 行
-    echo "extraargs=$PERF_ARGS" >> "$UENV"
+    echo "APPEND=$PERF_ARGS" >> "$UENV"
 fi
 
 # 记录日志
