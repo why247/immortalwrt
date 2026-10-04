@@ -1,0 +1,13 @@
+#!/bin/sh
+# Disable EEE (Energy Efficient Ethernet) on RTL8211F.
+#
+# The RTL8211F PHY has a hardware bug where EEE causes the link to drop
+# ~20 seconds after boot on Amlogic S905D (Phicomm N1). Kernel 6.18 removed
+# the code that honored the DTB "eee-broken-1000t" quirk, so EEE must be
+# disabled at runtime via ethtool.
+#
+# This hotplug script runs when the kernel registers eth0, early enough
+# to beat the link drop.
+[ "$INTERFACE" = "eth0" ] || exit 0
+[ "$ACTION" = "add" ] || exit 0
+ethtool --set-eee eth0 eee off 2>/dev/null
